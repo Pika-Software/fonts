@@ -1,0 +1,7 @@
+{
+    "name": "fonts",
+    "files": {
+        "lua/packages/fonts/package.lua": "https://raw.githubusercontent.com/Pika-Software/fonts/master/lua/packages/fonts/package.lua",
+        "lua/packages/fonts/init.lua": "https://raw.githubusercontent.com/Pika-Software/fonts/master/lua/packages/fonts/init.lua"
+    }
+}
