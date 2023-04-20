@@ -1,4 +1,4 @@
-import( file.Exists( "packages/units/package.lua", gpm.LuaRealm ) and "packages/units" or "https://raw.githubusercontent.com/Pika-Software/units/main/package.json" )
+import( gpm.sources.lua.CanImport( "packages/units" ) and "packages/units" or "https://raw.githubusercontent.com/Pika-Software/units/main/package.json" )
 
 local packageName = gpm.Package:GetIdentifier()
 local logger = gpm.Logger
