@@ -1,4 +1,4 @@
-import( gpm.PackageExists( "packages/units" ) and "packages/units" or "https://raw.githubusercontent.com/Pika-Software/units/main/package.json" )
+require( "packages/units", "https://github.com/Pika-Software/units" )
 
 local packageName = gpm.Package:GetIdentifier()
 local logger = gpm.Logger
