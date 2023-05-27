@@ -1,4 +1,4 @@
-require( "packages/units", "https://github.com/Pika-Software/units" )
+install( "packages/units", "https://github.com/Pika-Software/units" )
 
 local packageName = gpm.Package:GetIdentifier()
 local logger = gpm.Logger
