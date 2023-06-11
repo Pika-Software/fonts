@@ -1,6 +1,6 @@
 install( "packages/units", "https://github.com/Pika-Software/units" )
 
-local packageName = gpm.Package:GetIdentifier()
+local hook_Add = hook.Add
 local logger = gpm.Logger
 local pairs = pairs
 
@@ -92,4 +92,4 @@ function UpdateAll()
     end
 end
 
-hook.Add( "OnScreenSizeChanged", packageName, UpdateAll )
+hook_Add( "OnScreenSizeChanged", "Fonts", UpdateAll )

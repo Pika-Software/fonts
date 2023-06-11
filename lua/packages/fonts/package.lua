@@ -1,5 +1,4 @@
 name = "fonts"
-main = "init.lua"
-version = 000100
+version = 000101
 server = false
 logger = true
