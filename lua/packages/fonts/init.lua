@@ -1,10 +1,18 @@
 install( "packages/units", "https://github.com/Pika-Software/units" )
 
-local hook_Add = hook.Add
-local logger = gpm.Logger
-local pairs = pairs
+local units = units
+local hook = hook
 
-module( "fonts", package.seeall )
+local surface_CreateFont = surface.CreateFont
+local setmetatable = setmetatable
+local ArgAssert = ArgAssert
+local math_max = math.max
+local logger = gpm.Logger
+local assert = assert
+local pairs = pairs
+local type = type
+
+module( "fonts" )
 
 local fonts = {}
 
@@ -23,6 +31,14 @@ function meta:GetName()
     return self.name
 end
 
+function meta:GetSize()
+    return self.parameters.size
+end
+
+function meta:__tostring()
+    return "Font [" .. self:GetName() .. "][" .. self:GetSize()  .. "]"
+end
+
 -- https://wiki.facepunch.com/gmod/Structures/FontData
 function meta:Get( key )
     return self.parameters[ key ]
@@ -33,63 +49,59 @@ function meta:Set( key, value )
     self:Update()
 end
 
-do
-
-    local surface_CreateFont = surface.CreateFont
-    local math_max = math.max
-    local units = units
-
-    function meta:Update()
-        local fontData = {}
-        local parameters = self.parameters
-        for key, value in pairs( parameters ) do
-            if ( key == "size" ) then
-                fontData[ key ] = math_max( 4, units.Get( value ) )
-                continue
-            end
-
-            fontData[ key ] = value
+function meta:Update()
+    local data, size = {}, "undefined"
+    for key, value in pairs( self.parameters ) do
+        if key ~= "size" then
+            data[ key ] = value
+            continue
         end
 
-        surface_CreateFont( self.name, fontData )
-        logger:Debug( "Font created: %s, with size: %s (%spx)", self.name, parameters.size, fontData.size )
+        data[ key ] = math_max( 4, units.Get( value ) )
+        size = value
     end
 
+    surface_CreateFont( self.name, data )
+    logger:Debug( "Created font %s, with size '%s' (%spx)", self.name, size, data.size )
+    hook.Run( "FontUpdated", self )
 end
 
-do
+function Register( fontName, font, size, weight, antialias, extended )
+    ArgAssert( fontName, 1, "string" )
+    ArgAssert( font, 2, "string" )
 
-    local setmetatable = setmetatable
-    local ArgAssert = ArgAssert
+    assert( size ~= nil, "Font size cannot be nil!" )
 
-    function Register( fontName, font, size )
-        ArgAssert( fontName, 1, "string" )
-        ArgAssert( font, 2, "string" )
+    local parameters = {
+        ["antialias"] = antialias ~= false,
+        ["extended"] = extended ~= false,
+        ["font"] = font,
+        ["size"] = size
+    }
 
-        local new = setmetatable( {
-            ["name"] = fontName,
-            ["parameters"] = {
-                ["antialias"] = true,
-                ["extended"] = true,
-                ["weight"] = 500,
-                ["font"] = font,
-                ["size"] = size
-            }
-        }, meta )
-
-        fonts[ fontName ] = new
-        new:Update()
-
-        return new
+    if type( weight ) == "number" then
+        parameters.weight = weight
     end
 
+    local new = setmetatable( {
+        ["name"] = fontName,
+        ["parameters"] = parameters
+    }, meta )
+
+    fonts[ fontName ] = new
+    new:Update()
+
+    return new
 end
 
 function UpdateAll()
-    logger:Debug( "Updating all fonts..." )
+    local count = 0
     for _, font in pairs( fonts ) do
+        count = count + 1
         font:Update()
     end
+
+    logger:Debug( "All %d fonts have been updated!", count )
 end
 
-hook_Add( "OnScreenSizeChanged", "Fonts", UpdateAll )
+hook.Add( "OnScreenSizeChanged", "ScreenSizeChanged", UpdateAll )
